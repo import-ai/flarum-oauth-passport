@@ -49,12 +49,6 @@ class ForumAttributes
         $attributes['importAiOAuthPassport.popupWidth'] = (int) $this->settings->get('import-ai-oauth-passport.popup_width') ?: 580;
         $attributes['importAiOAuthPassport.popupHeight'] = (int) $this->settings->get('import-ai-oauth-passport.popup_height') ?: 400;
 
-        // Also pass as fof-oauth attributes so their popup utility uses our settings
-        // This ensures our popup dimensions are used when fof/oauth handles the click
-        $attributes['fof-oauth.fullscreenPopup'] = $attributes['importAiOAuthPassport.fullscreenPopup'];
-        $attributes['fof-oauth.popupWidth'] = $attributes['importAiOAuthPassport.popupWidth'];
-        $attributes['fof-oauth.popupHeight'] = $attributes['importAiOAuthPassport.popupHeight'];
-
         return $attributes;
     }
 }
