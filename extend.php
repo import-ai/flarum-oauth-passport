@@ -48,4 +48,8 @@ return [
     // Event listeners
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateUserOnLogin::class),
+
+    // Middleware for in-app browser OAuth fallback (WeChat, etc.)
+    (new Extend\Middleware('forum'))
+        ->add(Middleware\InAppBrowserOAuthFallback::class),
 ];
