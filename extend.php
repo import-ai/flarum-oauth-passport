@@ -13,6 +13,7 @@ namespace ImportAI\OAuthPassport;
 
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
+use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
     (new Extend\Frontend('forum'))
@@ -43,4 +44,8 @@ return [
         ->default('import-ai-oauth-passport.disable_password_login', false)
         ->default('import-ai-oauth-passport.button_color', '#684ba6')
         ->default('import-ai-oauth-passport.button_text_color', '#ffffff'),
+
+    // Event listeners
+    (new Extend\Event())
+        ->listen(OAuthLoginSuccessful::class, Listeners\UpdateUserOnLogin::class),
 ];

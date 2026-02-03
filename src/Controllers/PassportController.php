@@ -16,6 +16,8 @@ use Flarum\Forum\Auth\Registration;
 use Flarum\Forum\Auth\ResponseFactory;
 use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
+use FoF\Extend\Events\OAuthLoginSuccessful;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -28,15 +30,18 @@ class PassportController implements RequestHandlerInterface
     protected $settings;
     protected $response;
     protected $url;
+    protected $events;
 
     public function __construct(
         ResponseFactory $response,
         SettingsRepositoryInterface $settings,
-        UrlGenerator $url
+        UrlGenerator $url,
+        Dispatcher $events
     ) {
         $this->response = $response;
         $this->settings = $settings;
         $this->url = $url;
+        $this->events = $events;
     }
 
     protected function getProvider($redirectUri): PassportProvider
@@ -111,6 +116,20 @@ class PassportController implements RequestHandlerInterface
                 "Please configure the correct field names in the admin panel."
             );
         }
+
+        // Get the actor (current user) if logged in
+        $actor = \Flarum\Http\RequestUtil::getActor($request);
+
+        // Dispatch OAuth login successful event
+        $this->events->dispatch(
+            new OAuthLoginSuccessful(
+                $token,
+                $user,
+                'passport',
+                $id,
+                $actor->isGuest() ? null : $actor
+            )
+        );
 
         // Create Flarum auth response
         return $this->response->make(
