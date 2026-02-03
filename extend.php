@@ -17,7 +17,7 @@ use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
     (new Extend\Frontend('forum'))
-        ->js(__DIR__.'/js/dist/forum.js')
+        ->js(__DIR__.'/js/dist/forum.js', 'import-ai/oauth-passport')
         ->css(__DIR__.'/less/forum.less'),
 
     (new Extend\Frontend('admin'))
@@ -43,7 +43,10 @@ return [
         ->default('import-ai-oauth-passport.update_email', false)
         ->default('import-ai-oauth-passport.replace_login_signup', false)
         ->default('import-ai-oauth-passport.button_color', '#3B82F6')
-        ->default('import-ai-oauth-passport.button_text_color', '#ffffff'),
+        ->default('import-ai-oauth-passport.button_text_color', '#ffffff')
+        ->default('import-ai-oauth-passport.fullscreen_popup', false)
+        ->default('import-ai-oauth-passport.popup_width', 580)
+        ->default('import-ai-oauth-passport.popup_height', 400),
 
     // Event listeners
     (new Extend\Event())

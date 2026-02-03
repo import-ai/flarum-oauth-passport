@@ -13,7 +13,37 @@ import ItemList from 'flarum/common/utils/ItemList';
  * - Can replace all login/signup buttons with OAuth only
  * - Customizable button colors and icons
  * - Handles oauth_token for in-app browser OAuth flow
+ * - Customizable popup dimensions for OAuth
  */
+
+/**
+ * Open OAuth popup with custom dimensions
+ */
+function openOAuthPopup(path) {
+  const fullscreen = app.forum.attribute('importAiOAuthPassport.fullscreenPopup');
+
+  if (fullscreen) {
+    window.open(app.forum.attribute('baseUrl') + path, 'logInPopup', 'fullscreen=yes');
+  } else {
+    const defaultWidth = 580;
+    const defaultHeight = 400;
+
+    const width = app.forum.attribute('importAiOAuthPassport.popupWidth') || defaultWidth;
+    const height = app.forum.attribute('importAiOAuthPassport.popupHeight') || defaultHeight;
+
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+
+    const top = windowHeight / 2 - height / 2;
+    const left = windowWidth / 2 - width / 2;
+
+    window.open(
+      app.forum.attribute('baseUrl') + path,
+      'logInPopup',
+      `width=${width},height=${height},top=${top},left=${left},status=no,scrollbars=yes,resizable=no`
+    );
+  }
+}
 
 // Handle oauth_token URL parameter for in-app browser OAuth flow (WeChat, etc.)
 const urlParams = new URLSearchParams(window.location.search);
@@ -160,6 +190,30 @@ function initLoginButtons() {
   }
 }
 
+// Override LogInButton onclick to use custom popup dimensions for passport
+// Use event delegation to intercept clicks before they reach the button's onclick
+function initPassportClickInterceptor() {
+  document.addEventListener('click', function(event) {
+    // Find if the click was on or inside a passport login button
+    const button = event.target.closest('button.LogInButton, a.LogInButton');
+    if (!button) return;
+
+    // Check if this is the passport button by looking at the path or href attribute
+    const path = button.getAttribute('path');
+    const href = button.getAttribute('href');
+    const targetPath = path || href || '';
+
+    if (!targetPath.includes('/auth/passport')) return;
+
+    // Prevent the default behavior (which would use fof/oauth's handler)
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Open our custom popup
+    openOAuthPopup('/auth/passport');
+  }, true);  // Use capture phase to intercept before bubbling
+}
+
 // Initialize when forum data is ready
 function init() {
   if (!app.forum) {
@@ -172,6 +226,7 @@ function init() {
 // Start initialization
 init();
 initLoginButtons();
+initPassportClickInterceptor();
 
 // Helper: Adjust color brightness
 function adjustColor(color, amount) {

@@ -122,5 +122,27 @@ app.initializers.add('import-ai/oauth-passport', () => {
       setting: 'import-ai-oauth-passport.button_text_color',
       type: 'text',
       placeholder: '#ffffff',
+    })
+    .registerSetting({
+      label: app.translator.trans('import-ai-oauth-passport.admin.settings.fullscreen_popup_label'),
+      setting: 'import-ai-oauth-passport.fullscreen_popup',
+      type: 'boolean',
+      help: app.translator.trans('import-ai-oauth-passport.admin.settings.fullscreen_popup_help'),
+    })
+    .registerSetting({
+      label: app.translator.trans('import-ai-oauth-passport.admin.settings.popup_width_label'),
+      setting: 'import-ai-oauth-passport.popup_width',
+      type: 'number',
+      placeholder: '580',
+      min: 0,
+      help: app.translator.trans('import-ai-oauth-passport.admin.settings.popup_width_help'),
+    })
+    .registerSetting({
+      label: app.translator.trans('import-ai-oauth-passport.admin.settings.popup_height_label'),
+      setting: 'import-ai-oauth-passport.popup_height',
+      type: 'number',
+      placeholder: '400',
+      min: 0,
+      help: app.translator.trans('import-ai-oauth-passport.admin.settings.popup_height_help'),
     });
 });

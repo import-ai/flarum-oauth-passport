@@ -32,6 +32,13 @@ import-ai-oauth-passport:
       button_color_label: 登录按钮背景颜色
       button_text_color_label: 登录按钮文字颜色
 
+      fullscreen_popup_label: 使用全屏弹出窗口进行 OAuth 认证
+      fullscreen_popup_help: 启用后，OAuth 登录将以全屏弹出窗口打开。如果启用此选项，宽度和高度设置将被忽略。
+      popup_width_label: OAuth 弹窗宽度
+      popup_width_help: 设置 OAuth 弹出窗口的宽度。如果启用了"使用全屏弹出窗口进行 OAuth 认证"，此设置将被忽略。
+      popup_height_label: OAuth 弹框高度
+      popup_height_help: 设置 OAuth 弹出窗口的高度。如果启用了"使用全屏弹出窗口进行 OAuth 认证"，此设置将被忽略。
+
   forum:
     log_in:
       with_passport_button: 使用 Passport 登录

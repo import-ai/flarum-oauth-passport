@@ -4,6 +4,35 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import ItemList from 'flarum/common/utils/ItemList';
 
+/**
+ * Open OAuth popup with custom dimensions
+ */
+function openOAuthPopup(path: string) {
+  const fullscreen = app.forum.attribute('importAiOAuthPassport.fullscreenPopup');
+
+  if (fullscreen) {
+    window.open(app.forum.attribute<string>('baseUrl') + path, 'logInPopup', 'fullscreen=yes');
+  } else {
+    const defaultWidth = 580;
+    const defaultHeight = 400;
+
+    const width = app.forum.attribute<number>('importAiOAuthPassport.popupWidth') || defaultWidth;
+    const height = app.forum.attribute<number>('importAiOAuthPassport.popupHeight') || defaultHeight;
+
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+
+    const top = windowHeight / 2 - height / 2;
+    const left = windowWidth / 2 - width / 2;
+
+    window.open(
+      app.forum.attribute<string>('baseUrl') + path,
+      'logInPopup',
+      `width=${width},height=${height},top=${top},left=${left},status=no,scrollbars=yes,resizable=no`
+    );
+  }
+}
+
 app.initializers.add('import-ai/oauth-passport', () => {
   // Wait for forum data to be loaded
   if (!app.forum) {
@@ -86,6 +115,19 @@ app.initializers.add('import-ai/oauth-passport', () => {
     `;
     document.head.appendChild(hideSignupStyle);
   }
+
+  // Override LogInButton onclick to use custom popup dimensions for passport
+  override(LogInButton.prototype, 'initAttrs', function (original, attrs: any) {
+    // Call original first
+    original(attrs);
+
+    // Only override for passport OAuth path
+    if (attrs.path === '/auth/passport') {
+      attrs.onclick = function () {
+        openOAuthPopup(attrs.path);
+      };
+    }
+  });
 });
 
 // Helper function to darken/lighten color
