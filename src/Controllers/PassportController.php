@@ -96,18 +96,27 @@ class PassportController implements RequestHandlerInterface
         // Get user details from OAuth server
         $user = $provider->getResourceOwner($token);
 
+        $id = $user->getId();
+        $name = $user->getName();
+        $email = $user->getEmail();
+
+        // Check if we got a valid user ID
+        if (empty($id)) {
+            $idParam = $this->settings->get('import-ai-oauth-passport.id_parameter', 'id');
+            $availableFields = array_keys($user->toArray());
+            throw new Exception(
+                "Unable to retrieve user ID from OAuth provider. " .
+                "Configured ID field: '{$idParam}'. " .
+                "Available fields: " . implode(', ', $availableFields) . ". " .
+                "Please configure the correct field names in the admin panel."
+            );
+        }
+
         // Create Flarum auth response
         return $this->response->make(
             'passport',
-            $user->getId(),
-            function (Registration $registration) use ($user) {
-                $id = $user->getId();
-                $name = $user->getName();
-                $email = $user->getEmail();
-
-                if (empty($id)) {
-                    throw new Exception('Unable to retrieve user ID from OAuth provider');
-                }
+            $id,
+            function (Registration $registration) use ($user, $id, $name, $email) {
 
                 // Handle username
                 if ($this->settings->get('import-ai-oauth-passport.force_userid')) {

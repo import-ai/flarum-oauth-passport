@@ -121,9 +121,9 @@ class PassportProvider extends AbstractProvider
      */
     protected function createResourceOwner(array $response, AccessToken $token): ResourceOwnerInterface
     {
-        $idField = $this->settings->get('import-ai-oauth-passport.id_parameter', 'id');
-        $nameField = $this->settings->get('import-ai-oauth-passport.display_name_parameter', 'name');
-        $emailField = $this->settings->get('import-ai-oauth-passport.email_address_parameter', 'email');
+        $idField = $this->settings->get('import-ai-oauth-passport.id_parameter') ?: 'id';
+        $nameField = $this->settings->get('import-ai-oauth-passport.display_name_parameter') ?: 'name';
+        $emailField = $this->settings->get('import-ai-oauth-passport.email_address_parameter') ?: 'email';
 
         return new PassportResourceOwner($response, $idField, $nameField, $emailField);
     }
