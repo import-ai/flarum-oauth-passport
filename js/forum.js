@@ -67,14 +67,15 @@ function applyDynamicStyles() {
   }
 }
 
-// Add OAuth button to header when in replace mode
+// Add OAuth button to header when in replace mode and user is not logged in
 extend(HeaderSecondary.prototype, 'items', function (items) {
   if (!app.forum) return;
 
   const replaceLoginSignup = app.forum.attribute('importAiOAuthPassport.replaceLoginSignup');
   const enabled = app.forum.attribute('importAiOAuthPassport.enabled');
+  const isLoggedIn = !!app.session.user;
 
-  if (replaceLoginSignup && enabled) {
+  if (replaceLoginSignup && enabled && !isLoggedIn) {
     items.add(
       'oauth-login',
       LogInButton.component({
