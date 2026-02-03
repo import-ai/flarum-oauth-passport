@@ -12,6 +12,7 @@
 namespace ImportAI\OAuthPassport\Extenders;
 
 use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
 use Flarum\Settings\SettingsRepositoryInterface;
 
@@ -27,10 +28,16 @@ class ForumAttributes
      */
     protected $settings;
 
-    public function __construct(Translator $translator, SettingsRepositoryInterface $settings)
+    /**
+     * @var UrlGenerator
+     */
+    protected $url;
+
+    public function __construct(Translator $translator, SettingsRepositoryInterface $settings, UrlGenerator $url)
     {
         $this->translator = $translator;
         $this->settings = $settings;
+        $this->url = $url;
     }
 
     public function __invoke(ForumSerializer $serializer): array
@@ -48,6 +55,7 @@ class ForumAttributes
         $attributes['importAiOAuthPassport.fullscreenPopup'] = (bool) $this->settings->get('import-ai-oauth-passport.fullscreen_popup');
         $attributes['importAiOAuthPassport.popupWidth'] = (int) $this->settings->get('import-ai-oauth-passport.popup_width') ?: 580;
         $attributes['importAiOAuthPassport.popupHeight'] = (int) $this->settings->get('import-ai-oauth-passport.popup_height') ?: 400;
+        $attributes['importAiOAuthPassport.redirectUrl'] = $this->url->to('forum')->route('import-ai-oauth-passport.auth');
 
         return $attributes;
     }

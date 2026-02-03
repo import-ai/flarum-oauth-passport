@@ -8,12 +8,21 @@ app.initializers.add('import-ai/oauth-passport', () => {
       setting: 'import-ai-oauth-passport.enabled',
       type: 'boolean',
     })
-    .registerSetting({
-      label: app.translator.trans('import-ai-oauth-passport.admin.settings.redirect_url_label'),
-      setting: 'import-ai-oauth-passport.redirect_url',
-      type: 'text',
-      placeholder: 'http://your-forum.com/auth/passport',
-      readonly: true,
+    .registerSetting(function() {
+      const redirectUrl = app.forum.attribute('importAiOAuthPassport.redirectUrl');
+      return m('div.Form-group', [
+        m('label', app.translator.trans('import-ai-oauth-passport.admin.settings.redirect_url_label')),
+        m('input.FormControl', {
+          type: 'text',
+          value: redirectUrl,
+          readonly: true,
+          onclick: (e: Event) => {
+            const input = e.target as HTMLInputElement;
+            input.select();
+          },
+        }),
+        m('p.helpText', app.translator.trans('import-ai-oauth-passport.admin.settings.redirect_url_help')),
+      ]);
     })
     .registerSetting({
       label: app.translator.trans('import-ai-oauth-passport.admin.settings.client_id_label'),
