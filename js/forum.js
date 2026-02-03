@@ -36,8 +36,8 @@ function applyDynamicStyles() {
     document.head.appendChild(style);
   }
 
-  // Hide password login fields when disabled or in replace mode
-  if (app.forum.attribute('importAiOAuthPassport.disablePasswordLogin') || replaceLoginSignup) {
+  // Hide password login fields in replace mode
+  if (replaceLoginSignup) {
     const hidePasswordStyle = document.createElement('style');
     hidePasswordStyle.textContent = `
       .LogInModal .Form--centered > .Form-group:first-child,

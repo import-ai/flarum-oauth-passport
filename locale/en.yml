@@ -25,7 +25,6 @@ import-ai-oauth-passport:
 
       update_display_name_label: Update display name on login
       update_email_label: Update email address on login
-      disable_password_login_label: Disable username & password login
       replace_login_signup_label: Replace login/signup buttons with OAuth button only
 
       button_title_label: Login Button Title

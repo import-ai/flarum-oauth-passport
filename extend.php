@@ -41,7 +41,6 @@ return [
         ->default('import-ai-oauth-passport.force_email', false)
         ->default('import-ai-oauth-passport.update_display_name', false)
         ->default('import-ai-oauth-passport.update_email', false)
-        ->default('import-ai-oauth-passport.disable_password_login', false)
         ->default('import-ai-oauth-passport.replace_login_signup', false)
         ->default('import-ai-oauth-passport.button_color', '#684ba6')
         ->default('import-ai-oauth-passport.button_text_color', '#ffffff'),
