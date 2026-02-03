@@ -1,0 +1,34 @@
+{
+    "name": "import-ai/flarum-oauth-passport",
+    "description": "Laravel Passport OAuth provider for Flarum - standalone implementation",
+    "keywords": [
+        "flarum",
+        "oauth",
+        "passport",
+        "laravel"
+    ],
+    "type": "flarum-extension",
+    "license": "MIT",
+    "require": {
+        "flarum/core": "^1.2.0",
+        "league/oauth2-client": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "ImportAI\\OAuthPassport\\": "src/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "OAuth Passport",
+            "category": "authentication",
+            "icon": {
+                "name": "fas fa-passport",
+                "color": "#fff",
+                "backgroundColor": "#684ba6"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

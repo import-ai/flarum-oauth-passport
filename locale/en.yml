@@ -1,0 +1,40 @@
+import-ai-oauth-passport:
+  admin:
+    settings:
+      title: OAuth Passport Settings
+
+      enabled_label: Enable OAuth Passport Login
+
+      redirect_url_label: Redirect URL (copy to your OAuth server)
+      redirect_url_help: Copy this URL to your OAuth server's allowed redirect URLs
+
+      client_id_label: Client ID
+      client_secret_label: Client Secret
+
+      scopes_label: Scopes (comma separated)
+      authorization_endpoint_label: Authorization Endpoint URL
+      token_endpoint_label: Token Endpoint URL
+      user_information_endpoint_label: User Information Endpoint URL
+      id_parameter_label: User ID Field Name
+      display_name_parameter_label: Display Name Field Name
+      email_address_parameter_label: Email Address Field Name
+
+      force_userid_label: Force User ID as Username
+      force_name_label: Force Display Name
+      force_email_label: Force Email Address (mark as verified)
+
+      update_display_name_label: Update display name on login
+      update_email_label: Update email address on login
+      disable_password_login_label: Disable username & password login
+
+      button_title_label: Login Button Title
+      button_icon_label: Login Button Icon (FontAwesome class)
+      button_color_label: Login Button Background Color
+      button_text_color_label: Login Button Text Color
+
+  forum:
+    log_in:
+      with_passport_button: Login with Passport
+
+  api:
+    default-login-button-title: Login with Passport

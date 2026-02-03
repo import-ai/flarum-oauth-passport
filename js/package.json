@@ -1,0 +1,14 @@
+{
+  "name": "@import-ai/flarum-oauth-passport",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "flarum-webpack-config": "^2.0.0",
+    "webpack": "^5.76.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "webpack --mode development --watch",
+    "build": "webpack --mode production"
+  }
+}

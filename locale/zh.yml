@@ -1,0 +1,40 @@
+import-ai-oauth-passport:
+  admin:
+    settings:
+      title: OAuth Passport 设置
+
+      enabled_label: 启用 OAuth Passport 登录
+
+      redirect_url_label: 重定向 URL（复制到 OAuth 服务器）
+      redirect_url_help: 将此 URL 复制到 OAuth 服务器的允许重定向 URL 列表中
+
+      client_id_label: 客户端 ID
+      client_secret_label: 客户端密钥
+
+      scopes_label: 作用域（逗号分隔）
+      authorization_endpoint_label: 授权端点 URL
+      token_endpoint_label: 令牌端点 URL
+      user_information_endpoint_label: 用户信息端点 URL
+      id_parameter_label: 用户 ID 字段名
+      display_name_parameter_label: 显示名字段名
+      email_address_parameter_label: 邮箱地址字段名
+
+      force_userid_label: 强制使用用户 ID 作为用户名
+      force_name_label: 强制使用显示名
+      force_email_label: 强制使用邮箱地址（标记为已验证）
+
+      update_display_name_label: 登录时更新显示名
+      update_email_label: 登录时更新邮箱地址
+      disable_password_login_label: 禁用用户名和密码登录
+
+      button_title_label: 登录按钮标题
+      button_icon_label: 登录按钮图标（FontAwesome 类名）
+      button_color_label: 登录按钮背景颜色
+      button_text_color_label: 登录按钮文字颜色
+
+  forum:
+    log_in:
+      with_passport_button: 使用 Passport 登录
+
+  api:
+    default-login-button-title: 使用 Passport 登录
