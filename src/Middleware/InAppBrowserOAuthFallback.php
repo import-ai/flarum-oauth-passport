@@ -3,6 +3,7 @@
 namespace ImportAI\OAuthPassport\Middleware;
 
 use Flarum\Http\UrlGenerator;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,10 +13,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 class InAppBrowserOAuthFallback implements MiddlewareInterface
 {
     protected UrlGenerator $url;
+    protected SettingsRepositoryInterface $settings;
 
-    public function __construct(UrlGenerator $url)
+    public function __construct(UrlGenerator $url, SettingsRepositoryInterface $settings)
     {
         $this->url = $url;
+        $this->settings = $settings;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -28,7 +31,7 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
         }
 
         // Only apply fallback for in-app browsers (WeChat, etc.)
-        // Normal browsers handle window.opener correctly
+        // Normal browsers handle window.opener correctly - don't interfere
         if (!$this->isInAppBrowser($request)) {
             return $response;
         }
@@ -97,9 +100,8 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
             }
         }
 
-        // Check for WebView indicators (but exclude Safari/Chrome which are native browsers)
+        // Check for WebView indicators
         if (strpos($lowerAgent, 'wv') !== false || strpos($lowerAgent, 'webview') !== false) {
-            // Make sure it's not just a regular browser
             if (strpos($lowerAgent, 'chrome/') === false && strpos($lowerAgent, 'safari/') === false) {
                 return true;
             }
@@ -168,6 +170,14 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
 
         $message = $isNewUser ? $messageNewUser : $messageExistingUser;
 
+        // Get configured button color from settings (default to blue if not set)
+        $buttonColor = $this->settings->get('import-ai-oauth-passport.button_color', '#3B82F6');
+        $buttonTextColor = $this->settings->get('import-ai-oauth-passport.button_text_color', '#ffffff');
+
+        // Sanitize color values
+        $buttonColor = htmlspecialchars($buttonColor, ENT_QUOTES, 'UTF-8');
+        $buttonTextColor = htmlspecialchars($buttonTextColor, ENT_QUOTES, 'UTF-8');
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -184,22 +194,21 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: #f5f5f5;
+            background: #ffffff;
             padding: 20px;
         }
         .container {
-            background: white;
+            background: #ffffff;
             border-radius: 12px;
             padding: 40px 30px;
             text-align: center;
             max-width: 360px;
             width: 100%;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
         }
         .checkmark {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #4a90e2;
+            color: {$buttonColor};
         }
         .message {
             font-size: 1.1rem;
@@ -211,7 +220,7 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
             width: 40px;
             height: 40px;
             border: 3px solid rgba(0,0,0,0.1);
-            border-top-color: #4a90e2;
+            border-top-color: {$buttonColor};
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1.5rem;
@@ -221,17 +230,17 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
         }
         .manual-link a {
             display: inline-block;
-            background: #4a90e2;
-            color: white;
+            background: {$buttonColor};
+            color: {$buttonTextColor};
             text-decoration: none;
             padding: 14px 32px;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: opacity 0.2s;
         }
         .manual-link a:hover {
-            background: #357abd;
+            opacity: 0.9;
         }
     </style>
 </head>
