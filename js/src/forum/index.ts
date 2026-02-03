@@ -47,10 +47,18 @@ app.initializers.add('import-ai/oauth-passport', () => {
     document.head.appendChild(hidePasswordStyle);
   }
 
+  // Replace login/signup buttons with OAuth button if enabled
+  const replaceLoginSignup = app.forum.attribute('importAiOAuthPassport.replaceLoginSignup');
+
   extend(LogInButtons.prototype, 'items', function (items: ItemList) {
     // Only show if OAuth Passport is enabled
     if (!app.forum.attribute('importAiOAuthPassport.enabled')) {
       return;
+    }
+
+    // If replace mode is on, clear all existing items first
+    if (replaceLoginSignup) {
+      items.clear();
     }
 
     items.add(
@@ -62,9 +70,22 @@ app.initializers.add('import-ai/oauth-passport', () => {
           path: '/auth/passport',
         },
         app.forum.attribute('importAiOAuthPassport.loginTitle')
-      )
+      ),
+      // When replacing, set high priority to ensure it's first
+      replaceLoginSignup ? 100 : 0
     );
   });
+
+  // Also hide the sign up link when replace mode is on
+  if (replaceLoginSignup) {
+    const hideSignupStyle = document.createElement('style');
+    hideSignupStyle.textContent = `
+      .LogInModal .Modal-footer {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(hideSignupStyle);
+  }
 });
 
 // Helper function to darken/lighten color

@@ -26,6 +26,7 @@ import-ai-oauth-passport:
       update_display_name_label: 登录时更新显示名
       update_email_label: 登录时更新邮箱地址
       disable_password_login_label: 禁用用户名和密码登录
+      replace_login_signup_label: 仅使用 OAuth 按钮替换登录/注册按钮
 
       button_title_label: 登录按钮标题
       button_icon_label: 登录按钮图标（FontAwesome 类名）

@@ -100,6 +100,11 @@ app.initializers.add('import-ai/oauth-passport', () => {
       type: 'boolean',
     })
     .registerSetting({
+      label: app.translator.trans('import-ai-oauth-passport.admin.settings.replace_login_signup_label'),
+      setting: 'import-ai-oauth-passport.replace_login_signup',
+      type: 'boolean',
+    })
+    .registerSetting({
       label: app.translator.trans('import-ai-oauth-passport.admin.settings.button_title_label'),
       setting: 'import-ai-oauth-passport.button_title',
       type: 'text',

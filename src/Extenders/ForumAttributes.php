@@ -45,6 +45,7 @@ class ForumAttributes
         $attributes['importAiOAuthPassport.buttonTextColor'] = $this->settings->get('import-ai-oauth-passport.button_text_color')
             ?: '#ffffff';
         $attributes['importAiOAuthPassport.disablePasswordLogin'] = (bool) $this->settings->get('import-ai-oauth-passport.disable_password_login');
+        $attributes['importAiOAuthPassport.replaceLoginSignup'] = (bool) $this->settings->get('import-ai-oauth-passport.replace_login_signup');
 
         return $attributes;
     }
