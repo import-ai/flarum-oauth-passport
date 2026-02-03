@@ -58,8 +58,11 @@ app.initializers.add('import-ai/oauth-passport', () => {
     document.head.appendChild(style);
   }
 
+  // Replace login/signup buttons with OAuth button if enabled
+  const replaceLoginSignup = app.forum.attribute('importAiOAuthPassport.replaceLoginSignup');
+
   // Hide username/password login if disabled
-  if (app.forum.attribute('importAiOAuthPassport.disablePasswordLogin')) {
+  if (replaceLoginSignup) {
     const hidePasswordStyle = document.createElement('style');
     hidePasswordStyle.textContent = `
       .LogInModal .Form--centered > .Form-group:first-child,
@@ -75,9 +78,6 @@ app.initializers.add('import-ai/oauth-passport', () => {
     `;
     document.head.appendChild(hidePasswordStyle);
   }
-
-  // Replace login/signup buttons with OAuth button if enabled
-  const replaceLoginSignup = app.forum.attribute('importAiOAuthPassport.replaceLoginSignup');
 
   extend(LogInButtons.prototype, 'items', function (items: ItemList) {
     // Only show if OAuth Passport is enabled

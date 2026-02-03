@@ -35,6 +35,8 @@ return [
                 'fof-oauth.generic.force_userid' => 'import-ai-oauth-passport.force_userid',
                 'fof-oauth.generic.force_name' => 'import-ai-oauth-passport.force_name',
                 'fof-oauth.generic.force_email' => 'import-ai-oauth-passport.force_email',
+                'fof-oauth.generic.update_display_name' => 'import-ai-oauth-passport.update_display_name',
+                'fof-oauth.generic.update_email' => 'import-ai-oauth-passport.update_email',
             ];
 
             foreach ($settingMappings as $oldKey => $newKey) {
