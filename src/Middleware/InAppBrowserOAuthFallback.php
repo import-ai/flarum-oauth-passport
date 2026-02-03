@@ -30,29 +30,48 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
             return $response;
         }
 
+        error_log('[OAuth Debug] OAuth callback detected: ' . $request->getUri()->getPath());
+
         // Only apply fallback for in-app browsers (WeChat, etc.)
         // Normal browsers handle window.opener correctly - don't interfere
         if (!$this->isInAppBrowser($request)) {
+            error_log('[OAuth Debug] Not an in-app browser, skipping fallback');
             return $response;
         }
 
+        error_log('[OAuth Debug] In-app browser detected: ' . $request->getHeaderLine('User-Agent'));
+
         // Only process HTML responses
         $contentType = $response->getHeaderLine('Content-Type');
+        error_log('[OAuth Debug] Content-Type: ' . $contentType);
         if (stripos($contentType, 'text/html') === false && $contentType !== '') {
+            error_log('[OAuth Debug] Not an HTML response, skipping');
             return $response;
         }
 
         // Get response body
         try {
-            $body = (string) $response->getBody();
+            $bodyStream = $response->getBody();
+
+            // If stream is seekable, make sure we're at the beginning
+            if ($bodyStream->isSeekable()) {
+                $bodyStream->rewind();
+            }
+
+            $body = $bodyStream->getContents();
+            error_log('[OAuth Debug] Response body length: ' . strlen($body));
         } catch (\Exception $e) {
+            error_log('[OAuth Debug] Error reading body: ' . $e->getMessage());
             return $response;
         }
 
         // Check if this is an OAuth completion response
         if (!$this->isOAuthCompletionResponse($body)) {
+            error_log('[OAuth Debug] Not an OAuth completion response');
             return $response;
         }
+
+        error_log('[OAuth Debug] OAuth completion response detected');
 
         // Extract payload and generate redirect response
         return $this->generateRedirectResponse($body, $response);
@@ -121,18 +140,37 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
     {
         // Extract the payload from the JavaScript
         $payload = $this->extractPayload($body);
+        error_log('[OAuth Debug] Extracted payload: ' . json_encode($payload));
         $baseUrl = $this->url->to('forum')->base();
 
         // Check if this is a new user registration (has token but no loggedIn flag)
         $isNewUser = isset($payload['token']) && empty($payload['loggedIn']);
+        error_log('[OAuth Debug] Is new user: ' . ($isNewUser ? 'yes' : 'no'));
 
         if ($isNewUser) {
-            // For new users, redirect with oauth_token to trigger signup modal
-            $redirectUrl = $baseUrl . '?oauth_token=' . urlencode($payload['token']);
+            // For new users, redirect with oauth_token and all user data to trigger signup modal
+            // Pass all necessary fields for SignUpModal: token, username, email, provided
+            $queryParams = [
+                'oauth_token' => $payload['token'],
+            ];
+
+            // Include optional fields if present
+            if (!empty($payload['username'])) {
+                $queryParams['oauth_username'] = $payload['username'];
+            }
+            if (!empty($payload['email'])) {
+                $queryParams['oauth_email'] = $payload['email'];
+            }
+            if (!empty($payload['provided']) && is_array($payload['provided'])) {
+                $queryParams['oauth_provided'] = implode(',', $payload['provided']);
+            }
+
+            $redirectUrl = $baseUrl . '?' . http_build_query($queryParams);
         } else {
             // For existing users, just redirect to homepage (they're already logged in via cookie)
             $redirectUrl = $baseUrl;
         }
+        error_log('[OAuth Debug] Redirect URL: ' . $redirectUrl);
 
         $html = $this->buildRedirectHtml($redirectUrl, $isNewUser);
 
@@ -148,17 +186,40 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
 
     protected function extractPayload(string $body): array
     {
+        error_log('[OAuth Debug] Extracting payload from body (first 1000 chars): ' . substr($body, 0, 1000));
+
         // Try to extract JSON payload from authenticationComplete or linkingComplete call
-        // Use balanced group matching to handle nested JSON objects
-        if (preg_match('/(?:authenticationComplete|linkingComplete)\s*\(\s*(\{.*\})\s*\)/s', $body, $matches)) {
-            $json = $matches[1];
-            // Validate it's proper JSON by decoding
-            $payload = json_decode($json, true);
-            if (is_array($payload) && json_last_error() === JSON_ERROR_NONE) {
-                return $payload;
+        // The response format is: <script>window.close(); window.opener.app.authenticationComplete({...});</script>
+        // We need to extract the JSON object inside the parentheses
+
+        // First try: match authenticationComplete or linkingComplete with JSON object
+        // The pattern looks for the function name followed by ( and captures everything until the matching )
+        // We use a recursive regex to properly handle nested objects
+        $patterns = [
+            // Pattern 1: Match the full pattern with window.opener.app prefix
+            // Captures JSON object up to );
+            '/window\.opener\.app\.(?:authenticationComplete|linkingComplete)\s*\(\s*(\{[\s\S]*?\})\s*\);/s',
+            // Pattern 2: Match without window.opener prefix
+            '/app\.(?:authenticationComplete|linkingComplete)\s*\(\s*(\{[\s\S]*?\})\s*\);/s',
+            // Pattern 3: Simple pattern matching just the function name
+            '/(?:authenticationComplete|linkingComplete)\s*\(\s*(\{[\s\S]*?\})\s*\);/s',
+        ];
+
+        foreach ($patterns as $index => $pattern) {
+            error_log('[OAuth Debug] Trying pattern ' . ($index + 1));
+            if (preg_match($pattern, $body, $matches)) {
+                $json = $matches[1];
+                error_log('[OAuth Debug] Pattern ' . ($index + 1) . ' matched. JSON: ' . substr($json, 0, 500));
+                $payload = json_decode($json, true);
+                if (is_array($payload) && json_last_error() === JSON_ERROR_NONE) {
+                    return $payload;
+                } else {
+                    error_log('[OAuth Debug] JSON decode error: ' . json_last_error_msg());
+                }
             }
         }
 
+        error_log('[OAuth Debug] All patterns failed to match');
         return [];
     }
 

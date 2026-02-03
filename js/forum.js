@@ -12,7 +12,34 @@ import ItemList from 'flarum/common/utils/ItemList';
  * - Adds OAuth login button to login modal and/or header
  * - Can replace all login/signup buttons with OAuth only
  * - Customizable button colors and icons
+ * - Handles oauth_token for in-app browser OAuth flow
  */
+
+// Handle oauth_token URL parameter for in-app browser OAuth flow (WeChat, etc.)
+const urlParams = new URLSearchParams(window.location.search);
+const oauthToken = urlParams.get('oauth_token');
+
+if (oauthToken) {
+  // Build payload with all OAuth data for SignUpModal
+  const payload = { token: oauthToken };
+
+  // Add optional fields if present
+  const oauthUsername = urlParams.get('oauth_username');
+  if (oauthUsername) payload.username = oauthUsername;
+
+  const oauthEmail = urlParams.get('oauth_email');
+  if (oauthEmail) payload.email = oauthEmail;
+
+  const oauthProvided = urlParams.get('oauth_provided');
+  if (oauthProvided) payload.provided = oauthProvided.split(',');
+
+  // Clean up the URL
+  const cleanUrl = window.location.pathname + window.location.hash;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  // Trigger the authentication complete flow with full payload
+  app.authenticationComplete(payload);
+}
 
 // Apply dynamic styles once forum data is available
 function applyDynamicStyles() {
