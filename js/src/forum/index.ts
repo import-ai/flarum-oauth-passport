@@ -1,4 +1,4 @@
-import { extend } from 'flarum/common/extend';
+import { extend, override } from 'flarum/common/extend';
 import app from 'flarum/forum/app';
 import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
