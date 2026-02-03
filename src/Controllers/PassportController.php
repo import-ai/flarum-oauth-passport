@@ -121,6 +121,11 @@ class PassportController implements RequestHandlerInterface
                 // Handle username
                 if ($this->settings->get('import-ai-oauth-passport.force_userid')) {
                     $registration->provide('username', $id);
+                    // When nickname extension is active, suggest the name as username
+                    // so the nickname field gets pre-filled correctly
+                    if (!empty($name) && $this->settings->get('display_name_driver') === 'nickname') {
+                        $registration->suggest('username', $name);
+                    }
                 } else {
                     $registration->suggest('username', $id);
                 }
