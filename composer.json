@@ -9,6 +9,16 @@
     ],
     "type": "flarum-extension",
     "license": "MIT",
+    "support": {
+        "source": "https://github.com/import-ai/flarum-oauth-passport"
+    },
+    "authors": [
+        {
+            "name": "Import AI",
+            "homepage": "https://github.com/import-ai",
+            "role": "Developer"
+        }
+    ],
     "require": {
         "flarum/core": "^1.2.0",
         "league/oauth2-client": "^2.7"
