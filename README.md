@@ -1,9 +1,6 @@
 # Flarum OAuth Passport
 
-![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg?style=flat-square)
-![Total Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg?style=flat-square)
-![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg?style=flat-square) ![Total Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg?style=flat-square) ![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
 
 English | [简体中文](./README_zh.md)
 
