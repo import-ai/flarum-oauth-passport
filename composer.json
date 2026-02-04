@@ -8,7 +8,7 @@
         "laravel"
     ],
     "type": "flarum-extension",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "support": {
         "source": "https://github.com/import-ai/flarum-oauth-passport"
     },

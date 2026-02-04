@@ -1,150 +1,147 @@
-# Flarum OAuth Password
+# Flarum OAuth Passport
 
-This file provides guidance to developers when working with code in this repository.
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg?style=flat-square)
+![Total Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg?style=flat-square)
+![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
 
-## Overview
+English | [简体中文](./README_zh.md)
 
-This is a **standalone** Flarum extension that enables OAuth2 authentication via Laravel Passport (or any OAuth2-compatible server). It does **NOT** require `fof/oauth` and provides full control over the OAuth callback route at `/auth/passport`.
+A standalone Flarum extension that enables OAuth2 authentication via Laravel Passport or any OAuth2-compatible server. No `fof/oauth` dependency required - full control over the OAuth flow with a custom callback route at `/auth/passport`.
 
-## Build Commands
+![screenshot](https://github.com/LucienShui/picx-images-hosting/raw/master/SCR-20260204-sqfk-3.1vz60p2wdq.webp)
 
-### Frontend (JavaScript/TypeScript)
+## Features
 
-All frontend build commands run from the `js/` directory:
+- **Standalone Implementation**: No dependency on `fof/oauth` - complete control over the OAuth flow
+- **Universal OAuth2 Support**: Works with Laravel Passport, Keycloak, Auth0, or any standard OAuth2 server
+- **Flexible User Data Mapping**: Configure field names for ID, display name, and email (supports dot notation for nested JSON)
+- **Customizable Login Button**: Set custom title, icon (FontAwesome), background color, and text color
+- **Account Linking**: Automatic account linking via OAuth provider ID
+- **Profile Synchronization**: Optionally update display name and email on subsequent logins
+- **Passwordless Option**: Hide default username/password fields for pure OAuth authentication
+- **Popup Configuration**: Fullscreen popup or custom width/height for OAuth window
+- **In-App Browser Support**: Built-in fallback for WeChat and other in-app browsers
+- **Migration Support**: Seamless migration from `blt950/oauth-generic` and `fof/passport`
+
+## Installation
 
 ```bash
-cd js/
-
-# Development build with watch
-npm run dev
-
-# Production build
-npm run build
+composer require import-ai/flarum-oauth-passport
 ```
 
-## Architecture
+## Upgrade
 
-### Backend (PHP)
-
-**Extender Pattern** (`extend.php`):
-- Uses Flarum's declarative extender system
-- `Extend\Routes('forum')` registers the custom OAuth callback route at `/auth/passport`
-- `Extend\ApiSerializer` passes settings to frontend via `ForumAttributes` extender
-- Settings use prefix `import-ai-oauth-passport.`
-
-**OAuth Flow** (`src/Controllers/PassportController.php`):
-1. User navigates to `/auth/passport` (no code)
-2. Controller redirects to OAuth server with state parameter (CSRF protection)
-3. OAuth server redirects back to `/auth/passport?code=xxx&state=xxx`
-4. Controller validates state, exchanges code for access token
-5. Fetches user info and creates/logs in Flarum user via `ResponseFactory`
-
-**Provider Implementation** (`src/Providers/PassportProvider.php`):
-- Extends League's `AbstractProvider`
-- Uses `BearerAuthorizationTrait`
-- Endpoints (authorize, token, user info) are configurable via settings
-- Supports dot notation for nested user data fields (e.g., `data.user.id`)
-
-### Frontend (JavaScript)
-
-**Critical Pattern - Immediate Execution** (`js/forum.js`):
-The forum entry point executes **immediately**, not via `app.initializers.add()`. This is required because Flarum's initializer system doesn't reliably start custom initializers:
-
-```javascript
-// Execute immediately when module loads
-function initPassport() {
-  if (!app.forum) {
-    setTimeout(initPassport, 10);  // Retry if forum not ready
-    return;
-  }
-  // ... initialization code
-}
-initPassport();
+```bash
+composer update import-ai/flarum-oauth-passport
+php flarum migrate
+php flarum cache:clear
 ```
 
-**Admin Panel** (`js/src/admin/index.ts`):
-- Uses standard `app.initializers.add()` pattern
-- Registers settings via `app.extensionData.for('import-ai-oauth-passport').registerSetting()`
+## Configuration
 
-**Component Extension**:
-- Uses `extend(LogInButtons.prototype, 'items', ...)` to add the OAuth button
-- Dynamically injects CSS for button colors based on admin settings
-- Can hide password login fields if `disablePasswordLogin` is enabled
+1. Navigate to **Administration** > **Extensions** > **OAuth Passport**
+2. Copy the **Redirect URL** to your OAuth server's allowed redirect URLs
+3. Configure OAuth endpoints and credentials (see below)
 
-### Settings Schema
+### OAuth Server Settings
 
-All settings use the prefix `import-ai-oauth-passport.`:
+| Setting | Description |
+|---------|-------------|
+| **Client ID** | Your OAuth application client ID |
+| **Client Secret** | Your OAuth application client secret |
+| **Scopes** | Comma-separated OAuth scopes (default: `read`) |
+| **Authorization Endpoint** | OAuth authorize URL (e.g., `https://auth.example.com/oauth/authorize`) |
+| **Token Endpoint** | OAuth token URL (e.g., `https://auth.example.com/oauth/token`) |
+| **User Information Endpoint** | User info URL (e.g., `https://auth.example.com/api/user`) |
 
-| Setting | Type | Description |
-|---------|------|-------------|
-| `enabled` | boolean | Enable OAuth login |
-| `client_id`, `client_secret` | text | OAuth credentials |
-| `scopes` | text | Comma-separated OAuth scopes |
-| `authorization_endpoint`, `token_endpoint`, `user_information_endpoint` | text | OAuth server URLs |
-| `id_parameter`, `display_name_parameter`, `email_address_parameter` | text | JSON field names (supports dot notation) |
-| `force_userid`, `force_name`, `force_email` | boolean | Force provider values vs. suggest |
-| `update_display_name`, `update_email` | boolean | Update on subsequent logins |
-| `disable_password_login` | boolean | Hide username/password fields |
-| `button_title`, `button_icon`, `button_color`, `button_text_color` | text | UI customization |
+### User Data Mapping
 
-### Frontend Attributes
+Configure the field names from your OAuth server's user info response:
 
-Settings are exposed to frontend via `ForumAttributes` with camelCase keys:
-- `importAiOAuthPassport.enabled`
-- `importAiOAuthPassport.loginTitle`
-- `importAiOAuthPassport.loginIcon`
-- `importAiOAuthPassport.buttonColor`
-- `importAiOAuthPassport.buttonTextColor`
-- `importAiOAuthPassport.disablePasswordLogin`
+| Setting | Default | Dot Notation Support |
+|---------|---------|---------------------|
+| **User ID Field** | `id` | Yes (e.g., `data.user.id`) |
+| **Display Name Field** | `name` | Yes (e.g., `data.name`) |
+| **Email Address Field** | `email` | Yes (e.g., `data.email`) |
 
-## Key Implementation Details
+### User Registration Options
 
-1. **forum.js must be plain JavaScript** - not TypeScript (entry point files cannot have type annotations)
+| Setting | Description |
+|---------|-------------|
+| **Force User ID as Username** | Use OAuth user ID as Flarum username instead of allowing user to choose |
+| **Force Display Name** | Use OAuth display name instead of allowing user to choose |
+| **Force Email Address** | Use OAuth email and mark as verified |
+| **Update Display Name on Login** | Sync display name from OAuth server on each login |
+| **Update Email on Login** | Sync email from OAuth server on each login |
 
-2. **Admin uses TypeScript** - source files in `js/src/` are TypeScript, compiled to `js/dist/`
+### Login Button Customization
 
-3. **Dot notation support** - User data field names support nested JSON (e.g., `data.user.id`)
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Button Title** | "Login with Passport" | Text displayed on the login button |
+| **Button Icon** | `fas fa-passport` | FontAwesome icon class |
+| **Button Background Color** | `#3B82F6` | Hex color code |
+| **Button Text Color** | `#ffffff` | Hex color code |
 
-4. **Migration support** - Can migrate from `blt950/oauth-generic` and `fof/passport` via `migrations/`
+### Popup Settings
 
-5. **State validation** - OAuth state parameter stored in session (`oauth2state`) for CSRF protection
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Fullscreen Popup** | `false` | Use fullscreen popup for OAuth (ignores width/height) |
+| **Popup Width** | `580` | OAuth popup window width in pixels |
+| **Popup Height** | `400` | OAuth popup window height in pixels |
 
-## Git Commit Guidelines
+### Advanced Options
 
-**Format**: `type(scope): Description`
+- **Replace Login/Signup Buttons**: Hide default username/password fields and show only the OAuth button
 
-**Types**:
+## OAuth Flow
 
-- `feat` - New features
-- `fix` - Bug fixes
-- `docs` - Documentation changes
-- `style` - Styling changes
-- `refactor` - Code refactoring
-- `perf` - Performance improvements
-- `test` - Test additions or changes
-- `chore` - Maintenance tasks
-- `revert` - Revert previous commits
-- `build` - Build system changes
+1. User clicks "Login with Passport" button
+2. Extension redirects to OAuth server with state parameter (CSRF protection)
+3. User authenticates on OAuth server
+4. OAuth server redirects back to `/auth/passport?code=xxx&state=xxx`
+5. Extension validates state and exchanges code for access token
+6. Extension fetches user info and creates/logs in Flarum user
+7. Optional: Dispatches `OAuthLoginSuccessful` event for custom handling
 
-**Rules**:
+## Migration from Other Extensions
 
-- Scope is required (e.g., `sidebar`, `tasks`, `auth`)
-- Description in sentence case with capital first letter
-- Use present tense action verbs (Add, Fix, Support, Update, Replace, Optimize)
-- No period at the end
-- Keep it concise and focused
+This extension includes built-in migrations for:
+- `blt950/oauth-generic`
+- `fof/passport`
 
-**Examples**:
+Simply install this extension and existing OAuth-linked accounts will continue to work.
 
+## Events
+
+The extension dispatches `FoF\Extend\Events\OAuthLoginSuccessful` after a successful OAuth login, allowing other extensions to perform custom actions:
+
+```php
+use FoF\Extend\Events\OAuthLoginSuccessful;
+
+$events->listen(OAuthLoginSuccessful::class, function (OAuthLoginSuccessful $event) {
+    $token = $event->token;        // AccessToken from League\OAuth2\Client
+    $user = $event->user;          // ResourceOwnerInterface
+    $provider = $event->provider;  // 'passport'
+    $providerId = $event->providerId;
+    $actor = $event->actor;        // Current user (null if guest)
+});
 ```
-feat(apple): Support apple signin
-fix(sidebar): Change the abnormal scrolling
-chore(children): Optimize children api
-refactor(tasks): Add timeout status
-```
 
-**Do NOT include**:
+## In-App Browser Support
 
-- "Generated with Claude Code" or similar attribution
-- "Co-Authored-By: Claude" or any Claude co-author tags
+For environments like WeChat where popups are blocked, the extension includes middleware that detects in-app browsers and provides a fallback mechanism for completing OAuth authentication.
+
+## Requirements
+
+- Flarum 1.2.0 or higher
+- PHP 7.4 or higher
+- An OAuth2-compatible authentication server
+
+## Links
+
+- [GitHub](https://github.com/import-ai/flarum-oauth-passport)
+- [Packagist](https://packagist.org/packages/import-ai/flarum-oauth-passport)
 

@@ -84,6 +84,11 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
             return true;
         }
 
+        // Feishu / Lark (in-app browser)
+        if (strpos($lowerAgent, 'feishu') !== false || strpos($lowerAgent, 'lark') !== false) {
+            return true;
+        }
+
         // Other common in-app browsers
         $inAppPatterns = [
             'weibo',           // Weibo
