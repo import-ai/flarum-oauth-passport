@@ -1,22 +1,22 @@
 # Flarum OAuth Passport | OAuth2 登录集成
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) [![Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) ![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) [![Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) ![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
 
 [English](./README.md) | 简体中文
 
-一个独立的 Flarum 扩展，支持通过 Laravel Passport 或任何 OAuth2 兼容服务器进行 OAuth2 认证。无需依赖 `fof/oauth` - 完全掌控 OAuth 流程，自定义回调路由 `/auth/passport`。
+一个独立的 Flarum 扩展，支持通过 Laravel Passport 或任何 OAuth2 兼容服务器进行 OAuth2 认证。无需依赖 `fof/oauth` - 完全可控的 OAuth 流程，自定义回调路由 `/auth/passport`。
 
 ## 功能
 
-- **独立实现**：不依赖 `fof/oauth` - 完全控制 OAuth 流程
+- **独立实现**：不依赖 `fof/oauth` - 完全可控的 OAuth 流程
 - **通用 OAuth2 支持**：兼容 Laravel Passport、Keycloak、Auth0 或任何标准 OAuth2 服务器
-- **灵活的用户数据映射**：可配置 ID、显示名和邮箱字段名（支持 JSON 点符号访问嵌套数据）
+- **灵活的用户数据映射**：可配置 ID、显示名和邮箱字段名（支持 JSON `.` 符号访问嵌套数据）
 - **可自定义登录按钮**：设置自定义标题、图标（FontAwesome）、背景色和文字颜色
-- **账号关联**：通过 OAuth 提供者 ID 自动关联账号
-- **资料同步**：可选在每次登录时同步显示名和邮箱
+- **账号关联**：通过 OAuth 服务器提供的 ID 自动关联账号
+- **资料同步**：可选在每次登录时更新显示名和邮箱
 - **无密码选项**：隐藏默认用户名/密码字段，实现纯 OAuth 认证
 - **弹窗配置**：支持全屏弹窗或自定义宽高
-- **应用内浏览器支持**：内置微信等应用内浏览器的回退处理机制
+- **应用内浏览器支持**：内置微信等应用内置浏览器的回调处理机制
 - **迁移支持**：无缝从 `blt950/oauth-generic` 和 `fof/passport` 迁移
 
 ## 安装
@@ -39,7 +39,7 @@ php flarum cache:clear
 
 1. 进入 **管理后台** > **扩展** > **OAuth Passport**
 2. 将 **重定向 URL** 复制到 OAuth 服务器的允许重定向 URL 列表中
-3. 配置 OAuth 端点和凭证（见下文）
+3. 配置 OAuth 接口和凭证（见下文）
 
 ### OAuth 服务器设置
 
@@ -48,9 +48,9 @@ php flarum cache:clear
 | **客户端 ID** | OAuth 应用的客户端 ID |
 | **客户端密钥** | OAuth 应用的客户端密钥 |
 | **作用域** | 逗号分隔的 OAuth 作用域（默认：`read`） |
-| **授权端点** | OAuth 授权 URL（如：`https://auth.example.com/oauth/authorize`） |
-| **令牌端点** | OAuth 令牌 URL（如：`https://auth.example.com/oauth/token`） |
-| **用户信息端点** | 用户信息 URL（如：`https://auth.example.com/api/user`） |
+| **授权接口** | OAuth 授权 URL（如：`https://auth.example.com/oauth/authorize`） |
+| **令牌接口** | OAuth 令牌 URL（如：`https://auth.example.com/oauth/token`） |
+| **用户信息接口** | 用户信息 URL（如：`https://auth.example.com/api/user`） |
 
 ### 用户数据映射
 
