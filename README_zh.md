@@ -1,10 +1,12 @@
 # Flarum OAuth Passport | OAuth2 登录集成
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) [![Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) ![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) [![Downloads](https://img.shields.io/packagist/dt/import-ai/flarum-oauth-passport.svg)](https://packagist.org/packages/import-ai/flarum-oauth-passport) ![Flarum](https://img.shields.io/badge/Flarum-1.2%2B-orange.svg)
 
 [English](./README.md) | 简体中文
 
 一个独立的 Flarum 扩展，支持通过 Laravel Passport 或任何 OAuth2 兼容服务器进行 OAuth2 认证。无需依赖 `fof/oauth` - 完全可控的 OAuth 流程，自定义回调路由 `/auth/passport`。
+
+![screenshot](https://github.com/LucienShui/picx-images-hosting/raw/master/SCR-20260204-sqfk-3.1vz60p2wdq.webp)
 
 ## 功能
 

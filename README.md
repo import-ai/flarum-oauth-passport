@@ -9,6 +9,8 @@ English | [简体中文](./README_zh.md)
 
 A standalone Flarum extension that enables OAuth2 authentication via Laravel Passport or any OAuth2-compatible server. No `fof/oauth` dependency required - full control over the OAuth flow with a custom callback route at `/auth/passport`.
 
+![screenshot](https://github.com/LucienShui/picx-images-hosting/raw/master/SCR-20260204-sqfk-3.1vz60p2wdq.webp)
+
 ## Features
 
 - **Standalone Implementation**: No dependency on `fof/oauth` - complete control over the OAuth flow
