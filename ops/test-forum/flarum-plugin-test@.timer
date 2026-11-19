@@ -1,0 +1,9 @@
+[Unit]
+Description=Check GitHub Actions for a new %i test candidate
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=2min
+
+[Install]
+WantedBy=timers.target

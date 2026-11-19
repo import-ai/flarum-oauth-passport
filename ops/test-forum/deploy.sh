@@ -8,11 +8,13 @@ cd /root/.local/docker/flarum
 exec 9>"$root/deploy.lock"
 flock -x 9
 
-forum_base=flarum-local-pr5:rollback
-if [[ -f $root/forum-baseline ]]; then
-  forum_base=$(< "$root/forum-baseline")
-  [[ $forum_base =~ ^flarum-forum-baseline:[0-9a-f]{40}$ ]]
-fi
+plugin=${2:-flarum-oauth-passport}
+case "$plugin" in
+  flarum-oauth-passport) image_repo=flarum-oauth-test ;;
+  flarum-webhook|flarum-webhook-notification) image_repo="$plugin-test" ;;
+  *) echo "Unsupported test plugin: $plugin" >&2; exit 1 ;;
+esac
+package="import-ai/$plugin"
 
 test "$(docker exec flarum php -r '$c = require "/opt/flarum/config.php"; echo $c["url"]," ",$c["database"]["database"];')" = 'https://test.omnibox.pro/community flarum_test'
 test -f compose.override.yaml
@@ -21,31 +23,36 @@ trap 'rm -rf -- "$scratch"' EXIT
 cp compose.override.yaml "$scratch/previous.yaml"
 previous=$(docker inspect flarum --format '{{.Config.Image}}')
 case "$previous" in
-  flarum-local-pr5:04615ec|flarum-local-pr5:rollback|flarum-oauth-test:*|flarum-forum-test:*) ;;
+  flarum-local-pr5:04615ec|flarum-local-pr5:rollback|flarum-oauth-test:*|flarum-forum-test:*|flarum-webhook-test:*|flarum-webhook-notification-test:*) ;;
   *) echo "Unexpected test forum image: $previous" >&2; exit 1 ;;
 esac
 
 mkdir "$scratch/source"
-curl -fsSL --retry 2 --max-time 60 "https://codeload.github.com/import-ai/flarum-oauth-passport/tar.gz/$sha" |
+curl -fsSL --retry 2 --max-time 60 "https://codeload.github.com/import-ai/$plugin/tar.gz/$sha" |
   tar -xz --no-same-owner -C "$scratch/source" --strip-components=1
 cp "$root/Dockerfile" "$root/prepare.php" "$scratch/"
 (
   cd "$scratch/source"
-  find src migrations js/dist less locale -type f -print0 |
+  for dir in src migrations js/dist less locale; do
+    if [[ -d $dir ]]; then find "$dir" -type f -print0; fi
+  done |
     sort -z |
     xargs -0 sha256sum
   sha256sum extend.php composer.json
 ) > "$scratch/source.sha256"
 
-image="flarum-oauth-test:$sha"
-if [[ $forum_base == flarum-forum-baseline:* ]]; then
-  image+=".${forum_base#*:}"
-fi
-docker build --build-arg "FORUM_BASE=$forum_base" --build-arg "REVISION=$sha" -t "$image" "$scratch"
+# Build on the running forum so the other installed plugins stay pinned.
+parent_id=$(docker image inspect "$previous" --format '{{.Id}}')
+image="$image_repo:$sha.${parent_id:7:12}"
+docker build --build-arg "FORUM_BASE=$previous" --build-arg "PACKAGE=$package" --build-arg "REVISION=$sha" -t "$image" "$scratch"
 expected=$(docker image inspect "$image" --format '{{.Id}}')
 test "$(docker image inspect "$image" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$sha"
 
-docker cp flarum:/opt/flarum/vendor/import-ai/flarum-oauth-passport/migrations "$scratch/previous-migrations"
+mkdir "$scratch/previous-migrations"
+if docker exec flarum test -d "/opt/flarum/vendor/$package/migrations"; then
+  docker cp "flarum:/opt/flarum/vendor/$package/migrations/." "$scratch/previous-migrations"
+fi
+mkdir -p "$scratch/source/migrations"
 if ! diff -qr "$scratch/previous-migrations" "$scratch/source/migrations"; then
   echo "Saving the test database before applying extension migrations."
   docker exec flarum sh -eu -c 'test "$DB_NAME" = flarum_test; export MYSQL_PWD="$DB_PASSWORD"; exec mariadb-dump --single-transaction --quick --skip-lock-tables -h "$DB_HOST" -P "${DB_PORT:-3306}" -u "$DB_USER" "$DB_NAME"' |
@@ -75,9 +82,9 @@ old_id=$(docker inspect flarum --format '{{.Id}}')
 recreate
 test "$(docker inspect flarum --format '{{.Id}}')" != "$old_id"
 test "$(docker inspect flarum --format '{{.Image}}')" = "$expected"
-installed=$(docker exec flarum php -r 'require "/opt/flarum/vendor/autoload.php"; echo Composer\InstalledVersions::getPrettyVersion("import-ai/flarum-oauth-passport");')
+installed=$(docker exec flarum php -r 'require "/opt/flarum/vendor/autoload.php"; echo Composer\InstalledVersions::getPrettyVersion($argv[1]);' "$package")
 test "$installed" = "dev-ci-$sha"
-docker exec -i -w /opt/flarum/vendor/import-ai/flarum-oauth-passport flarum sha256sum -c - < "$scratch/source.sha256" > "$scratch/verified"
+docker exec -i -w "/opt/flarum/vendor/$package" flarum sha256sum -c - < "$scratch/source.sha256" > "$scratch/verified"
 curl -fsS --retry 3 --max-time 10 -H 'Host: test.omnibox.pro' http://127.0.0.1:8889/community/api |
   python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["attributes"]["baseUrl"] == "https://test.omnibox.pro/community"'
 trap - ERR
