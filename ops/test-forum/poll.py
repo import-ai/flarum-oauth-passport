@@ -5,11 +5,15 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
-REPO = "import-ai/flarum-oauth-passport"
+PLUGIN = sys.argv[1] if len(sys.argv) > 1 else "flarum-oauth-passport"
+if PLUGIN not in {"flarum-oauth-passport", "flarum-webhook", "flarum-webhook-notification"}:
+    raise SystemExit(f"Unsupported test plugin: {PLUGIN}")
+REPO = f"import-ai/{PLUGIN}"
 API = f"https://api.github.com/repos/{REPO}"
 
 
@@ -48,7 +52,7 @@ def main():
     if os.uname().nodename.split(".", 1)[0] != "cy-cpu-3":
         raise SystemExit("This deployment only runs on cy-cpu-3")
     root = Path(__file__).resolve().parent
-    marker = root / "last-run"
+    marker = root / ("last-run" if PLUGIN == "flarum-oauth-passport" else f"last-run-{PLUGIN}")
     after = int(marker.read_text()) if marker.exists() else 0
     try:
         result = github("/actions/workflows/test-forum.yml/runs?status=success&per_page=25")
@@ -60,7 +64,7 @@ def main():
     for run in sorted(result["workflow_runs"], key=lambda item: item["run_number"], reverse=True):
         if eligible(run, after):
             print(f"Deploying {run['head_sha']} from {run['html_url']}", flush=True)
-            subprocess.run([root / "deploy.sh", run["head_sha"]], check=True)
+            subprocess.run([root / "deploy.sh", run["head_sha"], PLUGIN], check=True)
             temporary = marker.with_suffix(".tmp")
             temporary.write_text(str(run["run_number"]) + "\n")
             temporary.replace(marker)

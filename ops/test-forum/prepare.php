@@ -1,9 +1,13 @@
 <?php
 
-$package = 'import-ai/flarum-oauth-passport';
+$package = $argv[2];
 $file = '/opt/flarum/composer.json';
 $config = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
 $config['repositories'] ??= [];
+$config['repositories'] = array_values(array_filter(
+    $config['repositories'],
+    static fn ($repository) => ($repository['url'] ?? '') !== '/opt/extension-source',
+));
 array_unshift($config['repositories'], [
     'type' => 'path',
     'url' => '/opt/extension-source',

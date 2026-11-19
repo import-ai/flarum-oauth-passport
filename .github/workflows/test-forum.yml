@@ -3,8 +3,14 @@ name: Test forum candidate
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'ops/test-forum/**'
+      - '.github/workflows/test-forum.yml'
   push:
     branches: [main]
+    paths-ignore:
+      - 'ops/test-forum/**'
+      - '.github/workflows/test-forum.yml'
 
 permissions:
   contents: read
