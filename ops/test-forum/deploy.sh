@@ -6,7 +6,13 @@ sha=${1:?Expected a commit SHA}
 root=$(cd "$(dirname "$0")" && pwd)
 cd /root/.local/docker/flarum
 exec 9>"$root/deploy.lock"
-flock -n 9
+flock -x 9
+
+forum_base=flarum-local-pr5:rollback
+if [[ -f $root/forum-baseline ]]; then
+  forum_base=$(< "$root/forum-baseline")
+  [[ $forum_base =~ ^flarum-forum-baseline:[0-9a-f]{40}$ ]]
+fi
 
 test "$(docker exec flarum php -r '$c = require "/opt/flarum/config.php"; echo $c["url"]," ",$c["database"]["database"];')" = 'https://test.omnibox.pro/community flarum_test'
 test -f compose.override.yaml
@@ -15,7 +21,7 @@ trap 'rm -rf -- "$scratch"' EXIT
 cp compose.override.yaml "$scratch/previous.yaml"
 previous=$(docker inspect flarum --format '{{.Config.Image}}')
 case "$previous" in
-  flarum-local-pr5:04615ec|flarum-local-pr5:rollback|flarum-oauth-test:*) ;;
+  flarum-local-pr5:04615ec|flarum-local-pr5:rollback|flarum-oauth-test:*|flarum-forum-test:*) ;;
   *) echo "Unexpected test forum image: $previous" >&2; exit 1 ;;
 esac
 
@@ -32,7 +38,10 @@ cp "$root/Dockerfile" "$root/prepare.php" "$scratch/"
 ) > "$scratch/source.sha256"
 
 image="flarum-oauth-test:$sha"
-docker build --build-arg "REVISION=$sha" -t "$image" "$scratch"
+if [[ $forum_base == flarum-forum-baseline:* ]]; then
+  image+=".${forum_base#*:}"
+fi
+docker build --build-arg "FORUM_BASE=$forum_base" --build-arg "REVISION=$sha" -t "$image" "$scratch"
 expected=$(docker image inspect "$image" --format '{{.Id}}')
 test "$(docker image inspect "$image" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$sha"
 

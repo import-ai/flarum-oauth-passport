@@ -1,4 +1,5 @@
-FROM flarum-local-pr5:rollback AS baseline
+ARG FORUM_BASE=flarum-local-pr5:rollback
+FROM ${FORUM_BASE} AS baseline
 
 FROM baseline AS update
 ARG REVISION
