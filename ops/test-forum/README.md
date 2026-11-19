@@ -7,3 +7,5 @@ The host builds from `flarum-local-pr5:rollback`, the test-only baseline with th
 Install these files in `/root/.local/docker/flarum-oauth-test` on `cy-cpu-3`. Install the unit files in `/etc/systemd/system`, run `systemctl daemon-reload`, and enable `flarum-oauth-test.timer`. If the shared egress hits GitHub's anonymous rate limit, put a read-only GitHub credential in the host-only `github.env` as `FLARUM_GITHUB_TOKEN`. Keep the file restricted to root. The deployer uses the existing test Compose project and stores its image selection in `compose.override.yaml`.
 
 If startup or verification fails, the deployer restores the previous image selection. When migration files change it first saves a test database dump in the deployment directory. Review the migration and backup before restoring database state.
+
+For the host credential, select only this repository and read access to Actions, Contents and Pull requests. GitHub adds read access to Metadata. Rotate the credential before its expiry and check the journal after the next timer run. The latest successfully deployed workflow run number is recorded in `last-run`.
