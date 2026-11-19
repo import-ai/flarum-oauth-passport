@@ -1,0 +1,11 @@
+[Unit]
+Description=Deploy verified OAuth Passport commits to the test forum
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/.local/docker/flarum-oauth-test
+EnvironmentFile=-/root/.local/docker/flarum-oauth-test/github.env
+ExecStart=/usr/bin/python3 /root/.local/docker/flarum-oauth-test/poll.py
+UMask=0077
