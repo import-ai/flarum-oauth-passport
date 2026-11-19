@@ -1,0 +1,32 @@
+name: Test forum candidate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Check PHP
+        run: |
+          php -l extend.php
+          find src migrations -name '*.php' -print0 | xargs -0 -n1 php -l
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build frontend
+        working-directory: js
+        run: |
+          npm ci
+          npm run build
+          git diff --exit-code -- dist
