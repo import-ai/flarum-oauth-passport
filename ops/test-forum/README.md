@@ -1,6 +1,6 @@
 # OAuth Passport test deployment
 
-`test-forum.yml` checks PHP and rebuilds the committed frontend bundles on pull requests and pushes to `main`. The test host polls successful runs every two minutes. Only current `main` and open, same-repository PR heads targeting `main` qualify. Fork PRs run CI. Deployment results and any rollback are logged in `journalctl -u flarum-oauth-test.service`.
+`test-forum.yml` checks PHP and rebuilds the committed frontend bundles on pull requests and pushes to `main`. Changes limited to the test deployment tooling leave the installed OAuth Passport commit in place. The test host polls successful runs every two minutes. Only current `main` and open, same-repository PR heads targeting `main` qualify. Fork PRs run CI. Deployment results and any rollback are logged in `journalctl -u flarum-oauth-test.service`.
 
 The host builds from the running test forum image. Its startup script uses packaged extensions and checks the extension list. The deployer updates only the selected plugin, recreates the forum, then verifies the image, installed Composer version, package file hashes and test API. Composer conflicts fail before recreation.
 
