@@ -30,7 +30,7 @@ esac
 mkdir "$scratch/source"
 curl -fsSL --retry 2 --max-time 60 "https://codeload.github.com/import-ai/$plugin/tar.gz/$sha" |
   tar -xz --no-same-owner -C "$scratch/source" --strip-components=1
-cp "$root/Dockerfile" "$root/prepare.php" "$scratch/"
+cp "$root/Dockerfile" "$root/prepare.php" "$root/check-lock.php" "$scratch/"
 (
   cd "$scratch/source"
   for dir in src migrations js/dist less locale; do
