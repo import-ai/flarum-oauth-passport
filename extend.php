@@ -13,12 +13,19 @@ namespace ImportAI\OAuthPassport;
 
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
+use Flarum\Frontend\Document;
 use FoF\Extend\Events\OAuthLoginSuccessful;
+use Psr\Http\Message\ServerRequestInterface;
 
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js', 'import-ai/oauth-passport')
-        ->css(__DIR__.'/less/forum.less'),
+        ->css(__DIR__.'/less/forum.less')
+        ->content(static function (Document $document, ServerRequestInterface $request): void {
+            if ($request->getUri()->getHost() === 'test.omnibox.pro') {
+                $document->foot[] = '<div id="oauth-passport-deploy-e2e" style="position:fixed;bottom:16px;left:16px;z-index:1000;padding:8px 12px;background:#183153;color:#fff">OAUTH-PASSPORT-DEPLOY-E2E-20261122</div>';
+            }
+        }),
 
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js'),
