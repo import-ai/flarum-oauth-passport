@@ -38,6 +38,8 @@ def eligible(run, after, get=github):
         return run["head_branch"] == "main" and get("/commits/main")["sha"] == sha
     if run["event"] != "pull_request":
         return False
+    if PLUGIN == "flarum-oauth-passport" and re.fullmatch(r"feat/flarum-oauth-passport-[a-z0-9-]+-[1-9][0-9]*", run["head_branch"]):
+        return False  # Roadmap branches with this prefix are deployed by Fuck ENV.
     head = urllib.parse.quote("import-ai:" + run["head_branch"], safe="")
     return any(
         pr["state"] == "open"
