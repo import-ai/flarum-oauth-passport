@@ -39,8 +39,24 @@ if (oauthToken) {
   if (email) payload.email = email;
   if (provided) payload.provided = provided.split(',');
 
-  window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-  app.authenticationComplete(payload);
+  // This bundle runs before Flarum boots and mounts the app. Completing the
+  // authentication at that point only works by accident: WKWebView renders the
+  // sign-up modal, while Chromium (Android WebView) throws inside
+  // Modal.animateShow because the modal was never mounted, so the user is left
+  // on the index as a guest. Wait for the mounted app root before handing the
+  // token to Flarum, and keep the token in the URL until then so a reload can
+  // retry the flow.
+  const completeRegistration = (attempt = 0) => {
+    if (!document.querySelector('.App') && attempt < 500) {
+      setTimeout(() => completeRegistration(attempt + 1), 20);
+      return;
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    app.authenticationComplete(payload);
+  };
+
+  completeRegistration();
 }
 
 function adjustColor(color, amount) {

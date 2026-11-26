@@ -79,6 +79,13 @@ class InAppBrowserOAuthFallback implements MiddlewareInterface
         $userAgent = $request->getHeaderLine('User-Agent');
         $lowerAgent = strtolower($userAgent);
 
+        // OmniBox mobile app WebView. Both WKWebView and Android WebView look
+        // like Safari/Chrome, so rely on the marker the app appends instead of
+        // trying to infer the host from the rest of the UA.
+        if (strpos($lowerAgent, 'omniboxapp/') !== false) {
+            return true;
+        }
+
         // WeChat (MicroMessenger)
         if (strpos($lowerAgent, 'micromessenger') !== false) {
             return true;
